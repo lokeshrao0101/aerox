@@ -618,6 +618,15 @@ footer{background:var(--bone);padding:80px 0 36px;border-top:1px solid var(--lin
   .ig-grid{grid-template-columns:repeat(3,1fr)}
   .why-grid,.trust-grid,.values{grid-template-columns:1fr}
 }
+
+/* sale countdown bar */
+.salebar{background:linear-gradient(90deg,var(--clay),var(--clay-deep));color:var(--bone);display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:9px 16px;text-align:center}
+.salebar .sb-dot{width:9px;height:9px;border-radius:50%;background:var(--bone);box-shadow:0 0 0 0 rgba(244,240,233,.6);animation:sbpulse 1.6s infinite}
+@keyframes sbpulse{0%{box-shadow:0 0 0 0 rgba(244,240,233,.55)}70%{box-shadow:0 0 0 7px rgba(244,240,233,0)}100%{box-shadow:0 0 0 0 rgba(244,240,233,0)}}
+.salebar .sb-title{font-family:"Archivo";font-weight:800;font-size:12.5px;letter-spacing:.14em}
+.salebar .sb-sub{font-family:"Hanken Grotesk";font-weight:600;font-size:12.5px;opacity:.92;letter-spacing:.02em}
+.salebar .sb-timer{font-family:"Archivo";font-weight:800;font-size:13.5px;letter-spacing:.08em;background:rgba(0,0,0,.2);padding:4px 10px;border-radius:4px;font-variant-numeric:tabular-nums;min-width:104px;text-align:center}
+@media(max-width:560px){.salebar .sb-sub{display:none}.salebar{gap:9px;padding:8px 12px}.salebar .sb-title{font-size:11px}}
 </style>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -631,6 +640,14 @@ footer{background:var(--bone);padding:80px 0 36px;border-top:1px solid var(--lin
     <span>★ NEW DROP · NIKE AIR FORCE 1</span><span>★</span><span>Free Shipping On All Orders</span><span>★</span>
     <span>Easy 7-Day Returns</span><span>★</span><span>UPI · Cards · Net Banking</span><span>★</span>
   </div>
+</div>
+
+<!-- ============ SALE COUNTDOWN ============ -->
+<div class="salebar" id="saleBar">
+  <span class="sb-dot" aria-hidden="true"></span>
+  <b class="sb-title">END OF SEASON SALE</b>
+  <span class="sb-sub">Live today only · Ends in</span>
+  <span class="sb-timer" id="saleTimer">--:--:--</span>
 </div>
 
 <!-- ============ NAV ============ -->
@@ -1300,7 +1317,7 @@ function cardHTML(p){
 }
 
 function renderHome(){
-  document.getElementById('bestGrid').innerHTML=PRODUCTS.filter(p=>p.best).slice(0,4).map(cardHTML).join('');
+  document.getElementById('bestGrid').innerHTML=PRODUCTS.map(cardHTML).join('');
   document.getElementById('revTrack').innerHTML=REVIEWS.map(r=>`
     <div class="rev"><div class="stars">★★★★★</div><q>${r.t}</q>
       <div class="who"><div class="av">${r.i}</div><div><b>${r.n}</b><small>${r.c}</small></div></div></div>`).join('');
@@ -1606,7 +1623,21 @@ function checkDeepLink(){
   try{const pid=new URLSearchParams(location.search).get('p');
     if(pid&&PRODUCTS.some(p=>p.id===pid))openPDP(pid);}catch(e){}
 }
-renderHome();renderCart();observe();checkPaymentReturn();checkDeepLink();
+/* ============ SALE COUNTDOWN (live 1-day, resets at midnight) ============ */
+function startSaleTimer(){
+  const el=document.getElementById('saleTimer'); if(!el)return;
+  function tick(){
+    const now=new Date();
+    const end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0,0);
+    let d=Math.max(0,Math.floor((end-now)/1000));
+    const h=String(Math.floor(d/3600)).padStart(2,'0');
+    const m=String(Math.floor(d%3600/60)).padStart(2,'0');
+    const s=String(d%60).padStart(2,'0');
+    el.textContent=h+':'+m+':'+s;
+  }
+  tick(); setInterval(tick,1000);
+}
+renderHome();renderCart();observe();checkPaymentReturn();checkDeepLink();startSaleTimer();
 setTimeout(recentlyPurchased,5000);
 setInterval(recentlyPurchased,16000);
 </script>
